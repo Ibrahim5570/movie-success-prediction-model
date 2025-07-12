@@ -108,7 +108,7 @@ The Jupyter notebook that builds and trains the model is available here:
 
 ---
 
-## 👥 Contributor
+## 👥 Author
 
 * [Muhammad Ibrahim Abdullah](https://github.com/Ibrahim5570)
 
