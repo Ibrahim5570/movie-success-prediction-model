@@ -1,122 +1,185 @@
-# 🎬 Movie Success Predictor (Python + scikit-learn)
+# 🎬 Movie Success & Budget Predictor
+# Python • scikit-learn • TMDB Dataset
 
-This project implements a console-based machine learning model that predicts a movie’s box office success using metadata such as budget, cast, director, genres, and more. It demonstrates a complete end-to-end ML pipeline with data cleaning, feature extraction, model training, and an interactive CLI-based prediction tool.
+This project is an end-to-end machine learning system that predicts movie success,
+audience approval, and suggested budget using structured metadata and text features
+such as genres, cast, director, and production companies.
 
----
+It includes:
+- Data preprocessing and feature engineering
+- Multiple trained ML models
+- Two interactive CLI prediction tools
+- Saved models for reuse and deployment
 
-## 📖 Project Overview
 
-This Python-based machine learning project is built to predict whether a movie will be **successful** (i.e., revenue > 1.5 × budget) based on structured and semi-structured metadata. It is trained on the [TMDB 5000 Movie Dataset](https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata) and supports:
+# 📖 Project Overview
 
-* JSON parsing of complex fields like `cast`, `crew`, `genres`
-* Feature engineering from release dates and language
-* A `soup`-based vectorization method for combining categorical inputs
-* A console tool for step-by-step predictions using custom inputs
+Using the TMDB 5000 Movies & Credits dataset, this project builds machine learning
+models to answer:
 
----
+1. Will this movie be financially successful?
+   (Revenue > 1.5 × Budget)
 
-## 🚀 Features
+2. Will audiences like it?
+   (Vote average ≥ 6)
 
-* Merges and processes two raw datasets (`movies.csv` + `credits.csv`)
-* Extracts director, top cast, genres, and keywords from JSON-style fields
-* Adds release date features: year, month, and weekend flag
-* Builds a machine learning pipeline with:
+3. What budget range makes sense for this movie concept?
+   (Regression-based estimate)
 
-  * **CountVectorizer** for text
-  * **StandardScaler** for numerics
-  * **LabelEncoder** for language
-* Trains a **Random Forest Classifier** with \~75% accuracy
-* Includes a CLI-based prediction script using user input or default values
+The system combines numerical features, categorical encodings, and a text
+“soup” representation into a single feature space, then trains Random Forest
+models for prediction.
 
----
 
-## 🔧 Technologies Used
+# 🚀 Features
 
-* **Language:** Python 3.10
-* **Libraries:** pandas, numpy, scikit-learn, matplotlib, seaborn
-* **Model:** RandomForestClassifier
-* **Vectorizer:** CountVectorizer (bag of words for genres/keywords/etc.)
-* **Scaler & Encoder:** StandardScaler, LabelEncoder
-* **Interaction:** Command-line input via `input()` in a loop
+## Data Processing
+- Merges movies.csv and credits.csv
+- Parses JSON fields:
+  - genres
+  - keywords
+  - cast (top 3 actors)
+  - crew (director extraction)
+- Drops post-release leakage fields when required
+- Handles missing values and invalid budgets/revenues
 
----
+## Feature Engineering
+- Release date features:
+  - Year
+  - Month
+  - Weekend release flag
+- Text “soup” combining:
+  - Genres
+  - Keywords
+  - Production companies
+  - Cast
+  - Director
+- Encodes:
+  - Language (LabelEncoder)
+  - Text (CountVectorizer, 5,000 features)
+  - Numerics (StandardScaler)
 
-## 🧠 Model Input Features
 
-| Feature              | Type        | Description                               |
-| -------------------- | ----------- | ----------------------------------------- |
-| `budget`             | Numerical   | Movie's budget in USD                     |
-| `popularity`         | Numerical   | Popularity metric from TMDB               |
-| `runtime`            | Numerical   | Duration in minutes                       |
-| `original_language`  | Categorical | Encoded via `LabelEncoder`                |
-| `release_year`       | Numerical   | Extracted from `release_date`             |
-| `release_month`      | Numerical   | Extracted from `release_date`             |
-| `is_weekend_release` | Boolean     | `1` if released on Sat/Sun                |
-| `soup`               | Text        | Combined genres, keywords, cast, director |
+# 🤖 Models Trained
 
----
+## Movie Success Classifier
+Type: RandomForestClassifier  
+Target:
+  success = revenue > 1.5 × budget
 
-## 🧪 Sample Prediction CLI (Interactive)
+## Audience Approval Classifier
+Type: RandomForestClassifier  
+Target:
+  audience_liked = vote_average ≥ 6
 
-```
-🎬 Movie Success Predictor
-Enter movie details one by one. Leave blank to use defaults.
+## Budget Recommendation Model
+Type: RandomForestRegressor  
+Target:
+  budget (USD)
 
-Movie Title: Space Avengers
-Budget (in USD): 180000000
-Popularity score (0-100): 60.2
-Runtime (in minutes): 125
-Original language (e.g. 'en'): en
-Release year: 2025
-Release month (1-12): 7
-Weekend release? (1 for yes, 0 for no): 1
+Each model is trained on a shared feature space and saved for reuse.
 
-Movie soup (space-separated): Action Marvel Space ChrisEvans Russo
 
-🎯 Prediction for 'Space Avengers': ✅ Successful
-```
+# 📊 Input Features
 
----
+## Numerical Features
+- budget
+- popularity
+- runtime
+- original_language (encoded)
+- release_year
+- release_month
+- is_weekend_release
+- vote_average
+- vote_count
 
-## 🗂️ Repository Structure
+## Text Features (Soup)
+- Genres
+- Keywords
+- Production companies
+- Top cast
+- Director
 
-```
-📁 data/
-    ├── movies.csv
-    └── credits.csv
+Vectorized using CountVectorizer (Bag of Words).
 
-📁 model/
-    ├── movie_success_model.pkl
-    ├── scaler.pkl
-    ├── vectorizer.pkl
-    └── language_encoder.pkl
 
-📁 notebooks/
-    └── movie_success_training.ipynb
+# 🧪 Interactive CLI Tools
 
-📄 predict_interactive.py
-📄 batch_predict.py
-```
+## Full Prediction CLI
+Predicts:
+- Financial success
+- Audience approval
+- Probabilities for each outcome
 
----
+Script:
+  predict_interactive.py
 
-## 📄 Notebook
+Example output:
+  🎬 Dune Part Three — ✅ Success, 👍 Liked by audience
+  🔥 Financial Success Probability: 82.4%
+  ⭐ Audience Approval Probability: 76.1%
 
-The Jupyter notebook that builds and trains the model is available here:
 
-👉 [`notebooks/movie_success_training.ipynb`](notebooks/movie_success_training.ipynb)
+## Budget + Success CLI
+Predicts:
+- Success / flop
+- Probability
+- Suggested budget range
 
----
+Script:
+  budget_predictor.py
 
-## 👥 Author
+Example output:
+  🎬 Galactic Wars Prediction: ✅ Success
+  🔥 Probability: 78.2%
+  💰 Suggested Budget: $145,000,000
 
-* [Muhammad Ibrahim Abdullah](https://github.com/Ibrahim5570)
 
----
+# 🗂️ Repository Structure
 
-## 🔖 License
+data/
+├── movies.csv
+└── credits.csv
+
+model/
+├── movie_success_model.pkl
+├── audience_model.pkl
+├── success_model.pkl
+├── budget_model.pkl
+├── vectorizer.pkl
+├── scaler.pkl
+└── language_encoder.pkl
+
+train_models.py
+predict_interactive.py
+budget_predictor.py
+README.md
+
+
+# ⚙️ Tech Stack
+
+- Python 3.10
+- pandas / numpy
+- scikit-learn
+- joblib
+- Random Forest (Classifier & Regressor)
+
+
+# ⚠️ Important Notes
+
+- Some models use post-release features (votes, popularity)
+  and are intended for analysis, not pre-release forecasting.
+- Budget predictions are advisory only.
+- Unknown languages default to English encoding.
+
+
+# 👤 Author
+
+Muhammad Ibrahim Abdullah
+GitHub: https://github.com/Ibrahim5570
+
+
+# 📜 License
 
 This project is licensed under the MIT License.
-See the [LICENSE](LICENSE) file for full details.
-
----
+See the LICENSE file for details.
